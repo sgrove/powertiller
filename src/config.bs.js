@@ -2,10 +2,7 @@
 'use strict';
 
 
-var _appId = "6c510423-45bc-4f46-af1b-54bc1676c10c";
-
 var appId = "d9fa68ae-1ec6-46c0-9208-cf14ae755edb";
 
-exports._appId = _appId;
 exports.appId = appId;
 /* No side effect */
