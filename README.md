@@ -24,5 +24,3 @@ in `index.re`
 Back in https://www.onegraph.com/dashboard just add
 `http://localhost:5000` to your app's CORS origins, and you should be
 good to go.
-
-![Adding extension origin to OneGraph app](imgs/onedash.png)
