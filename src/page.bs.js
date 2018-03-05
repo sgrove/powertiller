@@ -80,19 +80,19 @@ function make(forcedVideoId, _) {
                     appId: Config$ReactTemplate.appId,
                     service: "github",
                     oauthFinishPath: "/src/popup.html",
-                    oneGraphOrigin: "http://serve.onegraph.io:8082"
+                    oneGraphOrigin: "https://serve.onegraph.com"
                   }),
               /* googleAuth */new OnegraphAuth.default({
                     appId: Config$ReactTemplate.appId,
                     service: "google",
                     oauthFinishPath: "/src/popup.html",
-                    oneGraphOrigin: "http://serve.onegraph.io:8082"
+                    oneGraphOrigin: "https://serve.onegraph.com"
                   }),
               /* twitterAuth */new OnegraphAuth.default({
                     appId: Config$ReactTemplate.appId,
                     service: "twitter",
                     oauthFinishPath: "/src/popup.html",
-                    oneGraphOrigin: "http://serve.onegraph.io:8082"
+                    oneGraphOrigin: "https://serve.onegraph.com"
                   }),
               /* videoId : None */0,
               /* currentUrl : None */0,

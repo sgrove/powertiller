@@ -31,7 +31,7 @@ let make = (~forcedVideoId=?, _children) => {
         makeConfig(
           ~service="github",
           ~appId=Config.appId,
-          ~oneGraphOrigin="http://serve.onegraph.io:8082",
+          ~oneGraphOrigin="https://serve.onegraph.com",
           ~oauthFinishPath="/src/popup.html",
           ()
         )
@@ -42,7 +42,7 @@ let make = (~forcedVideoId=?, _children) => {
         makeConfig(
           ~service="google",
           ~appId=Config.appId,
-          ~oneGraphOrigin="http://serve.onegraph.io:8082",
+          ~oneGraphOrigin="https://serve.onegraph.com",
           ~oauthFinishPath="/src/popup.html",
           ()
         )
@@ -53,7 +53,7 @@ let make = (~forcedVideoId=?, _children) => {
         makeConfig(
           ~service="twitter",
           ~appId=Config.appId,
-          ~oneGraphOrigin="http://serve.onegraph.io:8082",
+          ~oneGraphOrigin="https://serve.onegraph.com",
           ~oauthFinishPath="/src/popup.html",
           ()
         )
