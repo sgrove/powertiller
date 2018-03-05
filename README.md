@@ -13,7 +13,7 @@ npm install
 npm start
 # in another tab
 npm run webpack
-# in *another* tab if you don't want the chrome extension version
+# in *another* tab
 npx serve
 ```
 
