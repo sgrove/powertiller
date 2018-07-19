@@ -9,9 +9,9 @@ var Pervasives = require("bs-platform/lib/js/pervasives.js");
 var ReasonReact = require("reason-react/src/ReasonReact.js");
 var Js_primitive = require("bs-platform/lib/js/js_primitive.js");
 var Event$ReactTemplate = require("./event.bs.js");
-var Utils$ReactTemplate = require("./utils.bs.js");
 var Chrome$ReactTemplate = require("./chrome.bs.js");
 var Client$ReactTemplate = require("./client.bs.js");
+var Option$ReactTemplate = require("./option.bs.js");
 
 var component = ReasonReact.reducerComponent("Page");
 
@@ -78,7 +78,7 @@ function make(forcedVideoId, _) {
               var match = state[/* failed */3];
               var match$1 = state[/* videoId */1];
               if (match) {
-                return Utils$ReactTemplate.s("Not on a Youtube site");
+                return "Not on a Youtube site";
               } else if (match$1) {
                 return React.createElement("div", undefined, React.createElement("input", {
                                 defaultValue: state[/* eventId */4],
@@ -91,9 +91,9 @@ function make(forcedVideoId, _) {
                                       return /* () */0;
                                     }
                                   })
-                              }), React.createElement("h1", undefined, Utils$ReactTemplate.s("PowerTiller")), React.createElement("p", undefined, "Logged into YouTube: " + Pervasives.string_of_bool(state[/* isYouTubeLoggedIn */7])), React.createElement("p", undefined, "Logged into Eventil: " + Pervasives.string_of_bool(state[/* isEventilLoggedIn */5])), ReasonReact.element(/* None */0, /* None */0, Event$ReactTemplate.make(state[/* eventId */4], /* array */[])));
+                              }), React.createElement("h1", undefined, "PowerTiller"), React.createElement("p", undefined, "Logged into YouTube: " + Pervasives.string_of_bool(state[/* isYouTubeLoggedIn */7])), React.createElement("p", undefined, "Logged into Eventil: " + Pervasives.string_of_bool(state[/* isEventilLoggedIn */5])), ReasonReact.element(/* None */0, /* None */0, Event$ReactTemplate.make(state[/* eventId */4], /* array */[])));
               } else {
-                return Utils$ReactTemplate.s("No video detected: " + Utils$ReactTemplate.$$default("unknown url", state[/* currentUrl */2]));
+                return "No video detected: " + Option$ReactTemplate.$$default("unknown url", state[/* currentUrl */2]);
               }
             }),
           /* initialState */(function () {

@@ -1,13 +1,3 @@
-open Utils;
-
-module RR = ReasonReact;
-
-let default = (value, option) =>
-  switch (option) {
-  | None => value
-  | Some(value) => value
-  };
-
 module FindPotentialVideosQuery = [%graphql
   {|
 query findPotentialVideos($q: String!) {
@@ -74,6 +64,7 @@ let make = (~term, ~presentationId, _children) => {
       ReasonReact.Update({...state, selectedVideo: Some(searchNode)})
     },
   render: self => {
+    open ReasonReact;
     Js.log2("term", term);
     let videosQuery = FindPotentialVideosQuery.make(~q=term, ());
     Js.log2("FPVQ", videosQuery);
@@ -81,11 +72,11 @@ let make = (~term, ~presentationId, _children) => {
       ...(
            ({result}) =>
              switch (result) {
-             | Loading => <div> (Utils.s("Loading")) </div>
+             | Loading => <div> (string("Loading")) </div>
              | Error(error) =>
                <div>
                  (
-                   Utils.s(
+                   string(
                      Option.default(
                        "Some error",
                        Js.Json.stringifyAny(error),
@@ -96,13 +87,20 @@ let make = (~term, ~presentationId, _children) => {
              | Data(result) =>
                <div>
                  <pre>
-                   (s(default("Baffled....", Js.Json.stringifyAny(result))))
+                   (
+                     string(
+                       Option.default(
+                         "Baffled....",
+                         Js.Json.stringifyAny(result),
+                       ),
+                     )
+                   )
                  </pre>
                  <ul>
                    (
                      ReasonReact.array(
                        switch (result##youTubeSearch) {
-                       | None => [|s("No search results")|]
+                       | None => [|string("No search results")|]
                        | Some(search) =>
                          Array.map(
                            edge =>
@@ -111,7 +109,7 @@ let make = (~term, ~presentationId, _children) => {
                                  _ => self.send(SelectSearchNode(edge##node))
                                )>
                                (
-                                 s(
+                                 string(
                                    edge##node##snippet##title
                                    ++ " - "
                                    ++ edge##node##snippet##description,

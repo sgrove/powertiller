@@ -12,7 +12,6 @@ var ReasonReact = require("reason-react/src/ReasonReact.js");
 var Js_primitive = require("bs-platform/lib/js/js_primitive.js");
 var ReasonApollo = require("reason-apollo/src/ReasonApollo.bs.js");
 var Caml_exceptions = require("bs-platform/lib/js/caml_exceptions.js");
-var Utils$ReactTemplate = require("./utils.bs.js");
 var Option$ReactTemplate = require("./option.bs.js");
 var Example$ReactTemplate = require("./example.bs.js");
 
@@ -391,7 +390,7 @@ function make$1(eventId, _) {
                               (function (param) {
                                   var result = param[/* result */0];
                                   if (typeof result === "number") {
-                                    return React.createElement("div", undefined, Utils$ReactTemplate.s("Loading"));
+                                    return React.createElement("div", undefined, "Loading");
                                   } else if (result.tag) {
                                     var match = result[0].eventil;
                                     if (match) {
@@ -402,7 +401,7 @@ function make$1(eventId, _) {
                                         if (match$2) {
                                           var presentation = match$2[0];
                                           var term = presentationToQueryTerm(presentation);
-                                          tmp = ReasonReact.element(/* None */0, /* None */0, Example$ReactTemplate.make(term, Utils$ReactTemplate.getExn("presentationId", presentation.id), /* array */[]));
+                                          tmp = ReasonReact.element(/* None */0, /* None */0, Example$ReactTemplate.make(term, Option$ReactTemplate.expect("presentationId", presentation.id), /* array */[]));
                                         } else {
                                           tmp = null;
                                         }
@@ -415,18 +414,18 @@ function make$1(eventId, _) {
                                                                           onClick: (function () {
                                                                               return Curry._1(self[/* send */3], /* SelectPresentation */[presentation]);
                                                                             })
-                                                                        }, Utils$ReactTemplate.s((
-                                                                              match ? "Y" : "X"
-                                                                            ) + (" " + (names + (" : " + $$default("No title", presentation.draft.title))))));
+                                                                        }, (
+                                                                          match ? "Y" : "X"
+                                                                        ) + (" " + (names + (" : " + $$default("No title", presentation.draft.title)))));
                                                             }), match$1[0].presentations)), React.createElement("hr", undefined), tmp);
                                       } else {
-                                        return Utils$ReactTemplate.s("No event");
+                                        return "No event";
                                       }
                                     } else {
-                                      return Utils$ReactTemplate.s("No eventil");
+                                      return "No eventil";
                                     }
                                   } else {
-                                    return React.createElement("div", undefined, Utils$ReactTemplate.s(Option$ReactTemplate.$$default("Some error", Js_primitive.undefined_to_opt(JSON.stringify(result[0])))));
+                                    return React.createElement("div", undefined, Option$ReactTemplate.$$default("Some error", Js_primitive.undefined_to_opt(JSON.stringify(result[0]))));
                                   }
                                 })
                             ]));

@@ -65,22 +65,14 @@ let inMemoryCache = ApolloInMemoryCache.createInMemoryCache();
 /* Create an HTTP Link */
 let httpLink = ApolloLinks.createHttpLink(~uri, ~credentials="include", ());
 
-/* request: operation => operation.setContext({headers: auth.authHeaders()}), */
-
-/* Create the ApolloClient */
-let instance =
-  ReasonApollo.createApolloClient(
-    ~link=from([|authLink, errorLink, httpLink|]),
-    ~cache=inMemoryCache,
-    (),
-  );
-
+/* Create the OneAuth */
 let auth =
   OneGraphAuth.(
     create(~appId=Config.appId, ~oauthFinishPath="/src/popup.html", ())
     |> make
   );
 
+/* Create the ApolloClient */
 let instance =
   boost({
     "uri": "https://serve.onegraph.com/dynamic?app_id=" ++ Config.appId,

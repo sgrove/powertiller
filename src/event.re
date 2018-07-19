@@ -1,5 +1,3 @@
-open Utils;
-open Option;
 open ReasonReact;
 
 let default = (value, option) =>
@@ -80,11 +78,11 @@ let make = (~eventId, _children) => {
       ...(
            ({result}) =>
              switch (result) {
-             | Loading => <div> (Utils.s("Loading")) </div>
+             | Loading => <div> (string("Loading")) </div>
              | Error(error) =>
                <div>
                  (
-                   Utils.s(
+                   string(
                      Option.default(
                        "Some error",
                        Js.Json.stringifyAny(error),
@@ -94,10 +92,10 @@ let make = (~eventId, _children) => {
                </div>
              | Data(result) =>
                switch (result##eventil) {
-               | None => s("No eventil")
+               | None => string("No eventil")
                | Some(eventil) =>
                  switch (eventil##event) {
-                 | None => s("No event")
+                 | None => string("No event")
                  | Some(event) =>
                    <div>
                      <ul>
@@ -120,7 +118,7 @@ let make = (~eventId, _children) => {
                                      )
                                  )>
                                  (
-                                   s(
+                                   string(
                                      (
                                        switch (presentation##video_url) {
                                        | None => "X"
@@ -152,7 +150,7 @@ let make = (~eventId, _children) => {
                          <Example
                            term
                            presentationId=(
-                             Utils.getExn("presentationId", presentation##id)
+                             Option.expect("presentationId", presentation##id)
                            )
                          />;
                        }

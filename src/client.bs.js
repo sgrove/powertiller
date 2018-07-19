@@ -5,8 +5,6 @@ var Block = require("bs-platform/lib/js/block.js");
 var Curry = require("bs-platform/lib/js/curry.js");
 var Printf = require("bs-platform/lib/js/printf.js");
 var ApolloLinks = require("reason-apollo/src/ApolloLinks.bs.js");
-var ApolloLink = require("apollo-link");
-var ReasonApollo = require("reason-apollo/src/ReasonApollo.bs.js");
 var ApolloBoost = require("apollo-boost");
 var OnegraphAuth = require("onegraph-auth");
 var ApolloInMemoryCache = require("reason-apollo/src/ApolloInMemoryCache.bs.js");
@@ -62,12 +60,6 @@ var _inMemoryCache = ApolloInMemoryCache.createInMemoryCache(/* Some */[(functio
 var inMemoryCache = ApolloInMemoryCache.createInMemoryCache(/* None */0, /* None */0, /* () */0);
 
 var httpLink = ApolloLinks.createHttpLink(uri, /* None */0, /* None */0, /* None */0, /* Some */["include"], /* None */0, /* () */0);
-
-ReasonApollo.createApolloClient(ApolloLink.from(/* array */[
-          authLink,
-          errorLink,
-          httpLink
-        ]), inMemoryCache, /* None */0, /* None */0, /* None */0, /* None */0, /* () */0);
 
 var auth = new OnegraphAuth.default({
       appId: Config$ReactTemplate.appId,

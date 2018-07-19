@@ -1,7 +1,3 @@
-open Utils;
-
-module RR = ReasonReact;
-
 module VideosDetailsQuery = [%graphql
   {|
 query VideoDetailsQuery($videoId: String!) {
@@ -31,16 +27,17 @@ module Query = ReasonApollo.CreateQuery(VideosDetailsQuery);
 let make = (~videoId, _children) => {
   ...component,
   render: _self => {
+    open ReasonReact;
     let videoQuery = VideosDetailsQuery.make(~videoId, ());
     <Query variables=videoQuery##variables>
       ...(
            ({result}) =>
              switch (result) {
-             | Loading => <div> (Utils.s("Loading")) </div>
+             | Loading => <div> (string("Loading")) </div>
              | Error(error) =>
                <div>
                  (
-                   Utils.s(
+                   string(
                      Option.default(
                        "Some error",
                        Js.Json.stringifyAny(error),
@@ -52,7 +49,7 @@ let make = (~videoId, _children) => {
                <div>
                  (
                    switch (result##youTubeVideo) {
-                   | None => s("No video found for id " ++ videoId)
+                   | None => string("No video found for id " ++ videoId)
                    | Some(video) =>
                      <div
                        dangerouslySetInnerHTML={

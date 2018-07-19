@@ -124,14 +124,14 @@ let make = (~forcedVideoId=?, _children) => {
   render: ({state, send: _send}) =>
     ReasonReact.(
       switch (true, true, state.failed, state.videoId) {
-      | (_, _, true, _) => Utils.s("Not on a Youtube site")
+      | (_, _, true, _) => string("Not on a Youtube site")
       | (_, _, _, None) =>
-        Utils.s(
+        string(
           "No video detected: "
-          ++ Utils.default("unknown url", state.currentUrl),
+          ++ Option.default("unknown url", state.currentUrl),
         )
-      | (false, _, _, _) => Utils.s("Please log with Github, ok?")
-      /* | (_, false, _, _) => Utils.s("Please log with Twitter") */
+      | (false, _, _, _) => string("Please log with Github, ok?")
+      /* | (_, false, _, _) => string("Please log with Twitter") */
       | (true, _, _, _) =>
         <div>
           <input
@@ -153,7 +153,7 @@ let make = (~forcedVideoId=?, _children) => {
             )
             _type="text"
           />
-          <h1> (Utils.s("PowerTiller")) </h1>
+          <h1> (string("PowerTiller")) </h1>
           <p>
             (
               string(

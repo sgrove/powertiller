@@ -1,10 +1,7 @@
 module Tabs = {
   type tab = {
     .
-    "id":
-      Js.Nullable.t(
-        int
-      ), /*
+    "id": Js.Nullable.t(int), /*
 The ID of the tab. Tab IDs are unique within a browser session. Under some circumstances a Tab may not be assigned an ID, for example when querying foreign tabs using the sessions API, in which case a session ID may be present. Tab ID can also be set to chrome.tabs.TAB_ID_NONE for apps and devtools windows.
 
      */
@@ -16,10 +13,7 @@ The zero-based index of the tab within its window.
 The ID of the window the tab is contained within.
 
      */
-    "openerTabId":
-      option(
-        int
-      ), /*
+    "openerTabId": option(int), /*
 The ID of the tab that opened this tab, if any. This property is only present if the opener tab still exists.
 
      */
@@ -41,51 +35,33 @@ Whether the tab is active in its window. (Does not necessarily mean the window i
 Whether the tab is pinned.
 
      */
-    "audible":
-      option(
-        bool
-      ), /*
+    "audible": option(bool), /*
 Since Chrome 45.
 
 
 Whether the tab has produced sound over the past couple of seconds (but it might not be heard if also muted). Equivalent to whether the speaker audio indicator is showing.
      */
-    "discarded":
-      option(
-        bool
-      ), /*
+    "discarded": option(bool), /*
 Since Chrome 54.
 
 
 Whether the tab is discarded. A discarded tab is one whose content has been unloaded from memory, but is still visible in the tab strip. Its content gets reloaded the next time it's activated.
      */
-    "autoDiscardable":
-      option(
-        bool
-      ), /*
+    "autoDiscardable": option(bool), /*
 Since Chrome 54.
 
 
 Whether the tab can be discarded automatically by the browser when resources are low.
      */
-    "url":
-      Js.Nullable.t(
-        string
-      ), /*
+    "url": Js.Nullable.t(string), /*
 The URL the tab is displaying. This property is only present if the extension's manifest includes the "tabs" permission.
 
      */
-    "title":
-      option(
-        string
-      ), /*
+    "title": option(string), /*
 The title of the tab. This property is only present if the extension's manifest includes the "tabs" permission.
 
      */
-    "favIconUrl":
-      option(
-        string
-      ), /*
+    "favIconUrl": option(string), /*
 The URL of the tab's favicon. This property is only present if the extension's manifest includes the "tabs" permission. It may also be an empty string if the tab is loading.
 
      */
@@ -93,31 +69,23 @@ The URL of the tab's favicon. This property is only present if the extension's m
 Either loading or complete.
 
      */
-    "incognito":
-      option(bool), /*
+    "incognito": option(bool), /*
 Whether the tab is in an incognito window.
 
      */
-    "width":
-      option(
-        int
-      ), /*
+    "width": option(int), /*
 Since Chrome 31.
 
 
 The width of the tab in pixels.
      */
-    "height":
-      option(
-        int
-      ), /*
+    "height": option(int), /*
 Since Chrome 31.
 
 
 The height of the tab in pixels.
      */
-    "sessionId":
-      option(string) /*
+    "sessionId": option(string) /*
 Since Chrome 31.
 
 
@@ -126,7 +94,7 @@ The session ID used to uniquely identify a Tab obtained from the sessions API.
   };
   type queryInfo = {
     .
-    "active": Js.boolean
+    "active": bool,
     /*Whether the tabs are active in their windows. */
     /* "pinned": option(bool), */
     /* /\*Whether the tabs are pinned. *\/ */
@@ -155,13 +123,12 @@ The session ID used to uniquely identify a Tab obtained from the sessions API.
   [@bs.val]
   external query : (queryInfo, array(tab) => unit) => unit =
     "chrome.tabs.query";
-  [@bs.val];
   let getActive = (callback: tab => unit) =>
     query(
-      {"active": Js.true_},
+      {"active": true},
       tabs => {
         Js.log2("tabs: ", tabs);
         callback(tabs[0]);
-      }
+      },
     );
 };

@@ -11,18 +11,9 @@ var ReasonReact = require("reason-react/src/ReasonReact.js");
 var Js_primitive = require("bs-platform/lib/js/js_primitive.js");
 var ReasonApollo = require("reason-apollo/src/ReasonApollo.bs.js");
 var Caml_exceptions = require("bs-platform/lib/js/caml_exceptions.js");
-var Utils$ReactTemplate = require("./utils.bs.js");
 var Option$ReactTemplate = require("./option.bs.js");
 var VideoSetter$ReactTemplate = require("./videoSetter.bs.js");
 var VideoPreview$ReactTemplate = require("./videoPreview.bs.js");
-
-function $$default(value, option) {
-  if (option) {
-    return option[0];
-  } else {
-    return value;
-  }
-}
 
 var Graphql_error = Caml_exceptions.create("Example-ReactTemplate.FindPotentialVideosQuery.Graphql_error");
 
@@ -314,11 +305,11 @@ function make$1(term, presentationId, _) {
                               (function (param) {
                                   var result = param[/* result */0];
                                   if (typeof result === "number") {
-                                    return React.createElement("div", undefined, Utils$ReactTemplate.s("Loading"));
+                                    return React.createElement("div", undefined, "Loading");
                                   } else if (result.tag) {
                                     var result$1 = result[0];
                                     var match = result$1.youTubeSearch;
-                                    return React.createElement("div", undefined, React.createElement("pre", undefined, Utils$ReactTemplate.s($$default("Baffled....", Js_primitive.undefined_to_opt(JSON.stringify(result$1))))), React.createElement("ul", undefined, match ? $$Array.map((function (edge) {
+                                    return React.createElement("div", undefined, React.createElement("pre", undefined, Option$ReactTemplate.$$default("Baffled....", Js_primitive.undefined_to_opt(JSON.stringify(result$1)))), React.createElement("ul", undefined, match ? $$Array.map((function (edge) {
                                                             var match = self[/* state */1][/* selectedVideo */2];
                                                             var tmp;
                                                             if (match) {
@@ -331,10 +322,10 @@ function make$1(term, presentationId, _) {
                                                                         onClick: (function () {
                                                                             return Curry._1(self[/* send */3], /* SelectSearchNode */[edge.node]);
                                                                           })
-                                                                      }, Utils$ReactTemplate.s(edge.node.snippet.title + (" - " + edge.node.snippet.description)), tmp);
-                                                          }), match[0].items.edges) : /* array */[Utils$ReactTemplate.s("No search results")]));
+                                                                      }, edge.node.snippet.title + (" - " + edge.node.snippet.description), tmp);
+                                                          }), match[0].items.edges) : /* array */["No search results"]));
                                   } else {
-                                    return React.createElement("div", undefined, Utils$ReactTemplate.s(Option$ReactTemplate.$$default("Some error", Js_primitive.undefined_to_opt(JSON.stringify(result[0])))));
+                                    return React.createElement("div", undefined, Option$ReactTemplate.$$default("Some error", Js_primitive.undefined_to_opt(JSON.stringify(result[0]))));
                                   }
                                 })
                             ]));
@@ -375,12 +366,6 @@ function make$1(term, presentationId, _) {
         ];
 }
 
-var RR = 0;
-
-exports.RR = RR;
-exports.$$default = $$default;
-exports.default = $$default;
-exports.__esModule = true;
 exports.FindPotentialVideosQuery = FindPotentialVideosQuery;
 exports.component = component;
 exports.Query = Query;

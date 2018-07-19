@@ -1,5 +1,3 @@
-open ApolloLinks;
-
 open ApolloInMemoryCache;
 
 type dataObject = {

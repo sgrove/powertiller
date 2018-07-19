@@ -9,7 +9,6 @@ var ReasonReact = require("reason-react/src/ReasonReact.js");
 var Js_primitive = require("bs-platform/lib/js/js_primitive.js");
 var ReasonApollo = require("reason-apollo/src/ReasonApollo.bs.js");
 var Caml_exceptions = require("bs-platform/lib/js/caml_exceptions.js");
-var Utils$ReactTemplate = require("./utils.bs.js");
 var Option$ReactTemplate = require("./option.bs.js");
 
 var Graphql_error = Caml_exceptions.create("VideoPreview-ReactTemplate.VideosDetailsQuery.Graphql_error");
@@ -333,7 +332,7 @@ function make$1(videoId, _) {
                               (function (param) {
                                   var result = param[/* result */0];
                                   if (typeof result === "number") {
-                                    return React.createElement("div", undefined, Utils$ReactTemplate.s("Loading"));
+                                    return React.createElement("div", undefined, "Loading");
                                   } else if (result.tag) {
                                     var match = result[0].youTubeVideo;
                                     var tmp;
@@ -345,11 +344,11 @@ function make$1(videoId, _) {
                                             }
                                           });
                                     } else {
-                                      tmp = Utils$ReactTemplate.s("No video found for id " + videoId);
+                                      tmp = "No video found for id " + videoId;
                                     }
                                     return React.createElement("div", undefined, tmp);
                                   } else {
-                                    return React.createElement("div", undefined, Utils$ReactTemplate.s(Option$ReactTemplate.$$default("Some error", Js_primitive.undefined_to_opt(JSON.stringify(result[0])))));
+                                    return React.createElement("div", undefined, Option$ReactTemplate.$$default("Some error", Js_primitive.undefined_to_opt(JSON.stringify(result[0]))));
                                   }
                                 })
                             ]));
@@ -362,9 +361,6 @@ function make$1(videoId, _) {
         ];
 }
 
-var RR = 0;
-
-exports.RR = RR;
 exports.VideosDetailsQuery = VideosDetailsQuery;
 exports.component = component;
 exports.Query = Query;
