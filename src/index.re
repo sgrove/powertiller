@@ -1,4 +1,6 @@
 ReactDOMRe.renderToElementWithId(
-  <Page forcedVideoId="S9phSjAORuA" />,
-  "index"
+  <ReasonApollo.Provider client=Client.instance>
+    <Page forcedVideoId="S9phSjAORuA" />
+  </ReasonApollo.Provider>,
+  "index",
 );

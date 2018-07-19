@@ -26,39 +26,48 @@ query VideoDetailsQuery($videoId: String!) {
 
 let component = ReasonReact.statelessComponent("VideoPreview");
 
-module Query = Client.Instance.Query;
+module Query = ReasonApollo.CreateQuery(VideosDetailsQuery);
 
 let make = (~videoId, _children) => {
   ...component,
   render: _self => {
     let videoQuery = VideosDetailsQuery.make(~videoId, ());
-    <Query query=videoQuery>
+    <Query variables=videoQuery##variables>
       ...(
-           (response, parse) =>
-             switch response {
+           ({result}) =>
+             switch (result) {
              | Loading => <div> (Utils.s("Loading")) </div>
-             | Failed(error) => <div> (Utils.s(error)) </div>
-             | Loaded(rawResult) =>
-               let result = parse(rawResult);
+             | Error(error) =>
                <div>
                  (
-                   switch result##youTubeVideo {
+                   Utils.s(
+                     Option.default(
+                       "Some error",
+                       Js.Json.stringifyAny(error),
+                     ),
+                   )
+                 )
+               </div>
+             | Data(result) =>
+               <div>
+                 (
+                   switch (result##youTubeVideo) {
                    | None => s("No video found for id " ++ videoId)
                    | Some(video) =>
                      <div
                        dangerouslySetInnerHTML={
                          "__html":
-                           switch video##player {
+                           switch (video##player) {
                            | None => "<strong>No video player available</strong>"
                            | Some(player) => player##embedHtml
-                           }
+                           },
                        }
                      />
                    }
                  )
-               </div>;
+               </div>
              }
          )
     </Query>;
-  }
+  },
 };

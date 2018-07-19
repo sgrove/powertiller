@@ -1,3 +1,6 @@
+[@bs.module "apollo-boost"] [@bs.new]
+external boost : Js.t({..}) => ApolloClient.generatedApolloClient = "default";
+
 open ApolloLinks;
 
 open ApolloInMemoryCache;
@@ -7,29 +10,23 @@ type dataObject = {
   .
   "__typename": string,
   "id": string,
-  "key": string
+  "key": string,
 };
 
 let logout = () => ();
 
+let uri =
+  Printf.sprintf("http://serve.onegraph.com/dynamic?app_id=%s", Config.appId);
+
 /* Create an HTTP Link */
-let httpLink =
-  createHttpLink(
-    ~uri=
-      Printf.sprintf(
-        "http://serve.onegraph.com/dynamic?app_id=%s",
-        Config.appId
-      ),
-    ~credentials="include",
-    ()
-  );
+let _httpLink = createHttpLink(~uri, ~credentials="include", ());
 
 /* Create a Link that puts an Authorization header in context */
 let contextHandler = () => {
   let headers = {
     "headers": {
-      "show_beta_schema": {j|true|j}
-    }
+      "show_beta_schema": {j|true|j},
+    },
   };
   headers;
 };
@@ -38,7 +35,7 @@ let authLink = createContextLink(contextHandler);
 
 /* Create a Link that handles 401 error responses */
 let errorHandler = errorResponse =>
-  switch errorResponse##networkError {
+  switch (errorResponse##networkError) {
   | Some(error) =>
     if (error##statusCode == 401) {
       logout();
@@ -50,7 +47,7 @@ let errorHandler = errorResponse =>
 
 let errorLink = createErrorLink(errorHandler);
 
-let inMemoryCache =
+let _inMemoryCache =
   createInMemoryCache(
     ~dataIdFromObject=
       (obj: dataObject) =>
@@ -59,22 +56,34 @@ let inMemoryCache =
         } else {
           obj##id;
         },
-    ()
+    (),
   );
 
-/*
-   Default in memory cache
-   let inMemoryCache = createInMemoryCache(());
- */
+/* Create an InMemoryCache */
+let inMemoryCache = ApolloInMemoryCache.createInMemoryCache();
+
+/* Create an HTTP Link */
+let httpLink = ApolloLinks.createHttpLink(~uri, ~credentials="include", ());
+
+/* request: operation => operation.setContext({headers: auth.authHeaders()}), */
+
 /* Create the ApolloClient */
-module Instance =
-  ReasonApollo.CreateClient(
-    {
-      let apolloClient =
-        ReasonApollo.createApolloClient(
-          ~cache=inMemoryCache,
-          ~link=from([|authLink, errorLink, httpLink|]),
-          ()
-        );
-    }
+let instance =
+  ReasonApollo.createApolloClient(
+    ~link=from([|authLink, errorLink, httpLink|]),
+    ~cache=inMemoryCache,
+    (),
   );
+
+let auth =
+  OneGraphAuth.(
+    create(~appId=Config.appId, ~oauthFinishPath="/src/popup.html", ())
+    |> make
+  );
+
+let instance =
+  boost({
+    "uri": "https://serve.onegraph.com/dynamic?app_id=" ++ Config.appId,
+    "request": operation =>
+      operation##setContext({"headers": auth##authHeaders()}),
+  });

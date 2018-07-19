@@ -15,17 +15,20 @@ mutation setEventilPresentationVideoId(
 |}
 ];
 
-let mutationComponent = ReasonReact.statelessComponent("VideoSetter");
+let mutationComponent = ReasonReact.statelessComponent("Video Setter");
 
-module Mutation = Client.Instance.Mutation;
+module Mutation = ReasonApollo.CreateMutation(SetPresentationVideoIdMutation);
 
 let make = (~presentationId, ~videoId, _children) => {
   ...mutationComponent,
   render: _self =>
     <Mutation>
       ...(
-           (mutate /* Mutation to call */, result /* Result of your mutation */) =>
-             switch result {
+           (
+             mutation /* Mutation to call */,
+             {result} /* Result of your mutation */,
+           ) =>
+             switch (result) {
              | NotCalled =>
                <div>
                  <button
@@ -35,28 +38,39 @@ let make = (~presentationId, ~videoId, _children) => {
                          SetPresentationVideoIdMutation.make(
                            ~presentationId,
                            ~youTubeVideoId=videoId,
-                           ()
+                           (),
                          );
-                       mutate(setVideoMutation);
+                       mutation(~variables=setVideoMutation##variables, ())
+                       |> ignore;
                      }
                    )>
                    (Utils.s("Set this video"))
                  </button>
                </div>
              | Loading => <div> (Utils.s("Loading mutation result")) </div>
-             | Loaded(response) =>
+             | Data(response) =>
                <div>
                  (
                    Utils.s(
                      Utils.default(
                        "Couldn't get result",
-                       Js.Json.stringifyAny(response)
-                     )
+                       Js.Json.stringifyAny(response),
+                     ),
                    )
                  )
                </div>
-             | Failed(error) => <div> (Utils.s(error)) </div>
+             | Error(error) =>
+               <div>
+                 (
+                   Utils.s(
+                     Option.default(
+                       "Some error",
+                       Js.Json.stringifyAny(error),
+                     ),
+                   )
+                 )
+               </div>
              }
          )
-    </Mutation>
+    </Mutation>,
 };

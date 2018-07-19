@@ -1,12 +1,9 @@
-type t;
-
 type config;
 
 [@bs.obj]
-external makeConfig :
+external create :
   (
     ~appId: string,
-    ~service: string,
     ~oauthFinishPath: string=?,
     ~oneGraphOrigin: string=?,
     unit
@@ -14,10 +11,15 @@ external makeConfig :
   config =
   "";
 
-[@bs.new] [@bs.module "onegraph-auth"] external make : config => t = "default";
+[@bs.deriving jsConverter]
+type service = [ | `YouTube | [@bs.as "github"] `GitHub | `Eventil];
 
-[@bs.send] external login : t => Js.Promise.t('a) = "";
+[@bs.new] [@bs.module "onegraph-auth"]
+external make : config => Js.t({..}) = "default";
 
-[@bs.send] external logout : t => Js.Promise.t('a) = "";
+[@bs.send] external login : (Js.t({..}), string) => Js.Promise.t('a) = "";
 
-[@bs.send] external isLoggedIn : t => Js.Promise.t(Js.boolean) = "";
+[@bs.send] external logout : (Js.t({..}), string) => Js.Promise.t('a) = "";
+
+[@bs.send]
+external isLoggedIn : (Js.t({..}), string) => Js.Promise.t(bool) = "";

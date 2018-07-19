@@ -3,7 +3,7 @@ open Utils;
 module RR = ReasonReact;
 
 let default = (value, option) =>
-  switch option {
+  switch (option) {
   | None => value
   | Some(value) => value
   };
@@ -34,8 +34,8 @@ type video = {
   "snippet": {
     .
     "description": string,
-    "title": string
-  }
+    "title": string,
+  },
 };
 
 type searchNode = {
@@ -44,8 +44,8 @@ type searchNode = {
   "snippet": {
     .
     "description": string,
-    "title": string
-  }
+    "title": string,
+  },
 };
 
 type action =
@@ -56,18 +56,18 @@ type action =
 type state = {
   count: int,
   show: bool,
-  selectedVideo: option(video)
+  selectedVideo: option(video),
 };
 
 let component = ReasonReact.reducerComponent("VideoSelector");
 
-module Query = Client.Instance.Query;
+module Query = ReasonApollo.CreateQuery(FindPotentialVideosQuery);
 
 let make = (~term, ~presentationId, _children) => {
   ...component,
   initialState: () => {count: 0, show: false, selectedVideo: None},
   reducer: (action, state) =>
-    switch action {
+    switch (action) {
     | Click => ReasonReact.Update({...state, count: state.count + 1})
     | Toggle => ReasonReact.Update({...state, show: ! state.show})
     | SelectSearchNode(searchNode) =>
@@ -77,40 +77,49 @@ let make = (~term, ~presentationId, _children) => {
     Js.log2("term", term);
     let videosQuery = FindPotentialVideosQuery.make(~q=term, ());
     Js.log2("FPVQ", videosQuery);
-    <Query query=videosQuery>
+    <Query variables=videosQuery##variables>
       ...(
-           (response, parse) =>
-             switch response {
+           ({result}) =>
+             switch (result) {
              | Loading => <div> (Utils.s("Loading")) </div>
-             | Failed(error) => <div> (Utils.s(error)) </div>
-             | Loaded(rawResult) =>
-               let result = parse(rawResult);
+             | Error(error) =>
+               <div>
+                 (
+                   Utils.s(
+                     Option.default(
+                       "Some error",
+                       Js.Json.stringifyAny(error),
+                     ),
+                   )
+                 )
+               </div>
+             | Data(result) =>
                <div>
                  <pre>
-                   (s(default("Baffled....", Js.Json.stringifyAny(rawResult))))
+                   (s(default("Baffled....", Js.Json.stringifyAny(result))))
                  </pre>
                  <ul>
                    (
-                     ReasonReact.arrayToElement(
-                       switch result##youTubeSearch {
+                     ReasonReact.array(
+                       switch (result##youTubeSearch) {
                        | None => [|s("No search results")|]
                        | Some(search) =>
                          Array.map(
                            edge =>
                              <li
                                onClick=(
-                                 (_) => self.send(SelectSearchNode(edge##node))
+                                 _ => self.send(SelectSearchNode(edge##node))
                                )>
                                (
                                  s(
                                    edge##node##snippet##title
                                    ++ " - "
-                                   ++ edge##node##snippet##description
+                                   ++ edge##node##snippet##description,
                                  )
                                )
                                (
-                                 switch self.state.selectedVideo {
-                                 | None => ReasonReact.nullElement
+                                 switch (self.state.selectedVideo) {
+                                 | None => ReasonReact.null
                                  | Some(selectedVideo) =>
                                    if (selectedVideo##id == edge##node##id) {
                                      <div>
@@ -123,20 +132,20 @@ let make = (~term, ~presentationId, _children) => {
                                        />
                                      </div>;
                                    } else {
-                                     ReasonReact.nullElement;
+                                     ReasonReact.null;
                                    }
                                  }
                                )
                              </li>,
-                           search##items##edges
+                           search##items##edges,
                          )
-                       }
+                       },
                      )
                    )
                  </ul>
-               </div>;
+               </div>
              }
          )
     </Query>;
-  }
+  },
 };

@@ -2,22 +2,22 @@ type action =
   | SetEventId(string)
   | SetVideoId(string)
   | SetUrl(option(string))
+  | SetEventilLoggedIn(bool)
   | SetGithubLoggedIn(bool)
   | SetGoogleLoggedIn(bool)
   | SetTwitterLoggedIn(bool)
   | Fail;
 
 type state = {
-  githubAuth: OneGraphAuth.t,
-  googleAuth: OneGraphAuth.t,
-  twitterAuth: OneGraphAuth.t,
+  oneAuth: Js.t({.}),
   videoId: option(string),
   currentUrl: option(string),
   failed: bool,
   eventId: string,
+  isEventilLoggedIn: bool,
   isGithubLoggedIn: bool,
-  isGoogleLoggedIn: bool,
-  isTwitterLoggedIn: bool
+  isYouTubeLoggedIn: bool,
+  isTwitterLoggedIn: bool,
 };
 
 let component = ReasonReact.reducerComponent("Page");
@@ -26,53 +26,22 @@ let make = (~forcedVideoId=?, _children) => {
   ...component,
   initialState: () => {
     eventId: "nordic-js-2017",
-    githubAuth:
-      OneGraphAuth.(
-        makeConfig(
-          ~service="github",
-          ~appId=Config.appId,
-          ~oneGraphOrigin="https://serve.onegraph.com",
-          ~oauthFinishPath="/src/popup.html",
-          ()
-        )
-        |> make
-      ),
-    googleAuth:
-      OneGraphAuth.(
-        makeConfig(
-          ~service="google",
-          ~appId=Config.appId,
-          ~oneGraphOrigin="https://serve.onegraph.com",
-          ~oauthFinishPath="/src/popup.html",
-          ()
-        )
-        |> make
-      ),
-    twitterAuth:
-      OneGraphAuth.(
-        makeConfig(
-          ~service="twitter",
-          ~appId=Config.appId,
-          ~oneGraphOrigin="https://serve.onegraph.com",
-          ~oauthFinishPath="/src/popup.html",
-          ()
-        )
-        |> make
-      ),
+    oneAuth: Client.auth,
     videoId: None,
     failed: false,
     currentUrl: None,
+    isEventilLoggedIn: false,
     isGithubLoggedIn: false,
-    isGoogleLoggedIn: false,
-    isTwitterLoggedIn: false
+    isYouTubeLoggedIn: false,
+    isTwitterLoggedIn: false,
   },
   reducer: (action, state) =>
-    switch action {
+    switch (action) {
     | SetVideoId(videoId) =>
       ReasonReact.Update({...state, videoId: Some(videoId)})
     | SetEventId(eventId) => ReasonReact.Update({...state, eventId})
     | SetUrl(url) =>
-      switch url {
+      switch (url) {
       | None => ReasonReact.Update({...state, currentUrl: None})
       | Some(url) =>
         let videoId: option(string) =
@@ -82,10 +51,12 @@ let make = (~forcedVideoId=?, _children) => {
           };
         ReasonReact.Update({...state, currentUrl: Some(url), videoId});
       }
+    | SetEventilLoggedIn(isLoggedIn) =>
+      ReasonReact.Update({...state, isEventilLoggedIn: isLoggedIn})
     | SetGithubLoggedIn(isLoggedIn) =>
       ReasonReact.Update({...state, isGithubLoggedIn: isLoggedIn})
     | SetGoogleLoggedIn(isLoggedIn) =>
-      ReasonReact.Update({...state, isGoogleLoggedIn: isLoggedIn})
+      ReasonReact.Update({...state, isYouTubeLoggedIn: isLoggedIn})
     | SetTwitterLoggedIn(isLoggedIn) =>
       ReasonReact.Update({...state, isTwitterLoggedIn: isLoggedIn})
     | Fail => ReasonReact.Update({...state, failed: true})
@@ -94,31 +65,29 @@ let make = (~forcedVideoId=?, _children) => {
     try (
       Chrome.Tabs.getActive(activeTab => {
         Js.log2("Active tab:", activeTab);
-        self.send(SetUrl(Js.Nullable.to_opt(activeTab##url)));
+        self.send(SetUrl(Js.Nullable.toOption(activeTab##url)));
       })
     ) {
     | _ =>
-      switch forcedVideoId {
+      switch (forcedVideoId) {
       | None => ()
       | Some(videoId) => self.send(SetVideoId(videoId))
       }
     };
-    OneGraphAuth.isLoggedIn(self.state.googleAuth)
-    |> Js.Promise.then_((isLoggedIn: Js.boolean) => {
-         Js.log2("User is logged in to Google: ", isLoggedIn);
-         let isLoggedIn = Js.to_bool(isLoggedIn);
+    OneGraphAuth.isLoggedIn(self.state.oneAuth, "youtube")
+    |> Js.Promise.then_((isLoggedIn: bool) => {
+         Js.log2("User is logged in to YouTube: ", isLoggedIn);
          self.send(SetGoogleLoggedIn(isLoggedIn));
-         switch isLoggedIn {
+         switch (isLoggedIn) {
          | false =>
-           Js.log("Forcing twitter login");
-           OneGraphAuth.login(self.state.googleAuth)
+           Js.log("Forcing YouTube login");
+           OneGraphAuth.login(self.state.oneAuth, "youtube")
            |> Js.Promise.then_(() =>
-                OneGraphAuth.isLoggedIn(self.state.googleAuth)
-                |> Js.Promise.then_((isLoggedIn: Js.boolean) => {
-                     let isLoggedIn = Js.to_bool(isLoggedIn);
+                OneGraphAuth.isLoggedIn(self.state.oneAuth, "youtube")
+                |> Js.Promise.then_(isLoggedIn => {
                      Js.log2(
-                       "User is logged in to google after login: ",
-                       isLoggedIn
+                       "User is logged in to YouTube after login: ",
+                       isLoggedIn,
                      );
                      self.send(SetGoogleLoggedIn(isLoggedIn));
                      Js.Promise.resolve(isLoggedIn);
@@ -128,40 +97,81 @@ let make = (~forcedVideoId=?, _children) => {
          };
        })
     |> ignore;
-    ReasonReact.NoUpdate;
+    OneGraphAuth.isLoggedIn(self.state.oneAuth, "eventil")
+    |> Js.Promise.then_((isLoggedIn: bool) => {
+         Js.log2("User is logged in to eventil: ", isLoggedIn);
+         self.send(SetEventilLoggedIn(isLoggedIn));
+         switch (isLoggedIn) {
+         | false =>
+           Js.log("Forcing Eventil login");
+           OneGraphAuth.login(self.state.oneAuth, "eventil")
+           |> Js.Promise.then_(() =>
+                OneGraphAuth.isLoggedIn(self.state.oneAuth, "eventil")
+                |> Js.Promise.then_(isLoggedIn => {
+                     Js.log2(
+                       "User is logged in to eventil after login: ",
+                       isLoggedIn,
+                     );
+                     self.send(SetEventilLoggedIn(isLoggedIn));
+                     Js.Promise.resolve(isLoggedIn);
+                   })
+              );
+         | true => Js.Promise.resolve(isLoggedIn)
+         };
+       })
+    |> ignore;
   },
   render: ({state, send: _send}) =>
-    switch (true, true, state.failed, state.videoId) {
-    | (_, _, true, _) => Utils.s("Not on a Youtube site")
-    | (_, _, _, None) =>
-      Utils.s(
-        "No video detected: " ++ Utils.default("unknown url", state.currentUrl)
-      )
-    | (false, _, _, _) => Utils.s("Please log with Github, ok?")
-    /* | (_, false, _, _) => Utils.s("Please log with Twitter") */
-    | (true, _, _, _) =>
-      <div>
-        <input
-          defaultValue=state.eventId
-          onKeyDown=(
-            event =>
-              if (ReactEventRe.Keyboard.keyCode(event) === 13) {
-                ReactEventRe.Keyboard.preventDefault(event);
-                _send(
-                  SetEventId(
-                    ReactDOMRe.domElementToObj(
-                      ReactEventRe.Keyboard.target(event)
-                    )##value
-                  )
-                );
-              } else {
-                ();
-              }
-          )
-          _type="text"
-        />
-        <h1> (Utils.s("PowerTiller")) </h1>
-        <Event eventId=state.eventId />
-      </div>
-    }
+    ReasonReact.(
+      switch (true, true, state.failed, state.videoId) {
+      | (_, _, true, _) => Utils.s("Not on a Youtube site")
+      | (_, _, _, None) =>
+        Utils.s(
+          "No video detected: "
+          ++ Utils.default("unknown url", state.currentUrl),
+        )
+      | (false, _, _, _) => Utils.s("Please log with Github, ok?")
+      /* | (_, false, _, _) => Utils.s("Please log with Twitter") */
+      | (true, _, _, _) =>
+        <div>
+          <input
+            defaultValue=state.eventId
+            onKeyDown=(
+              event =>
+                if (ReactEventRe.Keyboard.keyCode(event) === 13) {
+                  ReactEventRe.Keyboard.preventDefault(event);
+                  _send(
+                    SetEventId(
+                      ReactDOMRe.domElementToObj(
+                        ReactEventRe.Keyboard.target(event),
+                      )##value,
+                    ),
+                  );
+                } else {
+                  ();
+                }
+            )
+            _type="text"
+          />
+          <h1> (Utils.s("PowerTiller")) </h1>
+          <p>
+            (
+              string(
+                "Logged into YouTube: "
+                ++ string_of_bool(state.isYouTubeLoggedIn),
+              )
+            )
+          </p>
+          <p>
+            (
+              string(
+                "Logged into Eventil: "
+                ++ string_of_bool(state.isEventilLoggedIn),
+              )
+            )
+          </p>
+          <Event eventId=state.eventId />
+        </div>
+      }
+    ),
 };
