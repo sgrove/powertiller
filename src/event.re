@@ -1,25 +1,12 @@
 open ReasonReact;
 
-let default = (value, option) =>
-  switch (option) {
-  | None => value
-  | Some(value) => value
-  };
-
-let presentationToQueryTerm = presentation => {
-  let names =
-    Array.map(speaker => default("", speaker##name), presentation##speakers)
-    |> Array.to_list
-    |> String.concat(" ");
-  names ++ " : " ++ default("No title", presentation##draft##title);
-};
-
 module FindEventPresentationsQuery = [%graphql
   {|
 query findEventPresentations($id: String!) {
   eventil {
     event(id: $id) {
       id
+      name
       presentations {
         id
         draft {
@@ -36,43 +23,30 @@ query findEventPresentations($id: String!) {
 |}
 ];
 
-type presentation = {
-  .
-  "draft": {. "title": option(string)},
-  "id": option(string),
-  "speakers": Js.Array.t({. "name": option(string)}),
-  "video_url": option(string),
-};
-
 type action =
   | Click
-  | Toggle
-  | SelectPresentation(presentation);
+  | Toggle;
 
 type state = {
   count: int,
   show: bool,
-  selectedPresentation: option(presentation),
 };
 
 let component = ReasonReact.reducerComponent("Event");
 
 module Query = ReasonApollo.CreateQuery(FindEventPresentationsQuery);
 
-let make = (~eventId, _children) => {
+let icon = kind => <Antd.Icon type_=kind />;
+
+let make = (~eventId, ~onPresentationSelected, _children) => {
   ...component,
-  initialState: () => {count: 0, show: false, selectedPresentation: None},
+  initialState: () => {count: 0, show: false},
   reducer: (action, state) =>
     switch (action) {
-    | Click => ReasonReact.Update({...state, count: state.count + 1})
-    | Toggle => ReasonReact.Update({...state, show: ! state.show})
-    | SelectPresentation(presentation) =>
-      ReasonReact.Update({
-        ...state,
-        selectedPresentation: Some(presentation),
-      })
+    | Click => Update({...state, count: state.count + 1})
+    | Toggle => Update({...state, show: ! state.show})
     },
-  render: self => {
+  render: _self => {
     let videosQuery = FindEventPresentationsQuery.make(~id=eventId, ());
     <Query variables=videosQuery##variables>
       ...(
@@ -98,63 +72,82 @@ let make = (~eventId, _children) => {
                  | None => string("No event")
                  | Some(event) =>
                    <div>
-                     <ul>
+                     <h2 style=(ReactDOMRe.Style.make(~color="white", ()))>
                        (
-                         array(
-                           Array.map(
-                             presentation => {
-                               let names =
-                                 Array.map(
-                                   speaker => default("", speaker##name),
-                                   presentation##speakers,
-                                 )
-                                 |> Array.to_list
-                                 |> String.concat(" ");
-                               <li
-                                 onClick=(
-                                   _ =>
-                                     self.send(
-                                       SelectPresentation(presentation),
-                                     )
-                                 )>
-                                 (
-                                   string(
-                                     (
-                                       switch (presentation##video_url) {
-                                       | None => "X"
-                                       | Some(_) => "Y"
-                                       }
-                                     )
-                                     ++ " "
-                                     ++ names
-                                     ++ " : "
-                                     ++ default(
-                                          "No title",
-                                          presentation##draft##title,
-                                        ),
-                                   )
-                                 )
-                               </li>;
-                             },
-                             event##presentations,
-                           ),
-                         )
+                         event##name
+                         |> Option.default("Untitled Event")
+                         |> string
                        )
-                     </ul>
-                     <hr />
-                     (
-                       switch (self.state.selectedPresentation) {
-                       | None => null
-                       | Some(presentation) =>
-                         let term = presentationToQueryTerm(presentation);
-                         <Example
-                           term
-                           presentationId=(
-                             Option.expect("presentationId", presentation##id)
-                           )
-                         />;
-                       }
-                     )
+                     </h2>
+                     <Antd.Menu
+                       mode=`Inline
+                       multiple=false
+                       onSelect=(
+                         selectEvent => {
+                           let presentationId = selectEvent##key;
+                           let presentation =
+                             event##presentations
+                             |> Array.to_list
+                             |> List.find(pres =>
+                                  Option.expect(
+                                    "Presentation had no id in amkn",
+                                    pres##id,
+                                  )
+                                  == presentationId
+                                );
+                           onPresentationSelected(presentation);
+                         }
+                       )>
+                       (
+                         event##presentations
+                         |> Array.mapi((idx, presentation) => {
+                              let _names =
+                                presentation##speakers
+                                |> Array.to_list
+                                |> List.filter(speaker =>
+                                     switch (speaker##name) {
+                                     | None => false
+                                     | Some(_) => true
+                                     }
+                                   )
+                                |> List.map(speaker =>
+                                     Option.default("", speaker##name)
+                                   )
+                                |> String.concat(", ");
+                              <Antd.Menu.Item
+                                id=(
+                                  Option.default(
+                                    string_of_int(idx),
+                                    presentation##id,
+                                  )
+                                )
+                                key=(
+                                  Option.expect(
+                                    "Selected presentation had no id",
+                                    presentation##id,
+                                  )
+                                )>
+                                    <div>
+                                      (
+                                        switch (presentation##video_url) {
+                                        | None => icon(Antd.IconName.warning)
+                                        | Some(_) =>
+                                          icon(Antd.IconName.checkSquare)
+                                        }
+                                      )
+                                      (
+                                        presentation##draft##title
+                                        |> Option.default("Untitled")
+                                        |> string
+                                      )
+                                    </div>
+                                  </Antd.Menu.Item> /* ) */;
+                              /*   _ => onPresentationSelected(presentation) */
+                              /* onSelect=( */
+                            })
+                         |> array
+                       )
+                     </Antd.Menu>
                    </div>
                  }
                }

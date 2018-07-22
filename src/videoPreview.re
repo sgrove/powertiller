@@ -1,21 +1,29 @@
 module VideosDetailsQuery = [%graphql
   {|
-query VideoDetailsQuery($videoId: String!) {
-  youTubeVideo(id: $videoId) {
-    id
-    snippet {
-      uploadChannel {
-        snippet {
-          publishedAtTs
-          title
-        }
-      }
-      description
-    }
-    player {
-      embedHtml
-    }
-  }
+query VideoWithCaptionsQuery($videoId: String!) {
+  youTube {
+    video(id: $videoId) {
+     id
+     snippet {
+       title
+       publishedAt
+       description
+       channelTitle
+     }
+     player {
+       embedHtml
+     }
+     captions {
+       items {
+         snippet {
+           language
+           status
+         }
+       body
+       }
+     }
+   }
+ }
 }
 |}
 ];
@@ -48,18 +56,64 @@ let make = (~videoId, _children) => {
              | Data(result) =>
                <div>
                  (
-                   switch (result##youTubeVideo) {
+                   switch (result##youTube##video) {
                    | None => string("No video found for id " ++ videoId)
                    | Some(video) =>
-                     <div
-                       dangerouslySetInnerHTML={
-                         "__html":
-                           switch (video##player) {
-                           | None => "<strong>No video player available</strong>"
-                           | Some(player) => player##embedHtml
-                           },
-                       }
-                     />
+                     <div>
+                       <div
+                         dangerouslySetInnerHTML={
+                           "__html":
+                             switch (video##player) {
+                             | None => "<strong>No video player available</strong>"
+                             | Some(player) =>
+                               switch (player##embedHtml) {
+                               | None => "<strong>No video embed html available</strong>"
+                               | Some(html) => html
+                               }
+                             },
+                         }
+                       />
+                       (
+                         switch (video##snippet) {
+                         | None => string("No video metadata available")
+                         | Some(snippet) =>
+                           <div>
+                             <p>
+                               (
+                                 string(
+                                   snippet##publishedAt
+                                   |> Option.default(
+                                        "No published date available",
+                                      ),
+                                 )
+                               )
+                               (
+                                 string(
+                                   "  ("
+                                   ++ (
+                                     snippet##channelTitle
+                                     |> Option.default(
+                                          "No channel title available",
+                                        )
+                                   )
+                                   ++ ")  ",
+                                 )
+                               )
+                             </p>
+                             <p>
+                               (
+                                 string(
+                                   snippet##description
+                                   |> Option.default(
+                                        "No description available",
+                                      ),
+                                 )
+                               )
+                             </p>
+                           </div>
+                         }
+                       )
+                     </div>
                    }
                  )
                </div>

@@ -32,7 +32,8 @@ let make = (~presentationId, ~videoId, _children) => {
                switch (result) {
                | NotCalled =>
                  <div>
-                   <button
+                   <Antd.Button
+                     _type=`primary
                      onClick=(
                        _mouseEvent => {
                          let setVideoMutation =
@@ -46,7 +47,7 @@ let make = (~presentationId, ~videoId, _children) => {
                        }
                      )>
                      (string("Set this video"))
-                   </button>
+                   </Antd.Button>
                  </div>
                | Loading => <div> (string("Loading mutation result")) </div>
                | Data(response) =>
