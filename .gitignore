@@ -5,5 +5,6 @@ lib/
 .bsb.lock
 npm-debug.log
 src/index.js
+build/
 /lib/bs/
 /node_modules/
