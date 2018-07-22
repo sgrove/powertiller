@@ -136,9 +136,13 @@ let make = (~eventId, ~onPresentationSelected, _children) => {
                                         }
                                       )
                                       (
-                                        presentation##draft##title
-                                        |> Option.default("Untitled")
-                                        |> string
+                                        switch (presentation##draft) {
+                                        | None => null
+                                        | Some(draft) =>
+                                          draft##title
+                                          |> Option.default("Untitled")
+                                          |> string
+                                        }
                                       )
                                     </div>
                                   </Antd.Menu.Item> /* ) */;

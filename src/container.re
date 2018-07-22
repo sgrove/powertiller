@@ -182,8 +182,6 @@ let make = (~forcedVideoId=?, _children) => {
     | Fail => ReasonReact.Update({...state, failed: true})
     },
   didMount: self => {
-    open Js.Promise;
-    open Js;
     switch (forcedVideoId) {
     | None => ()
     | Some(videoId) => self.send(SetVideoId(videoId))

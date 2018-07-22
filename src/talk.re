@@ -1,5 +1,4 @@
 module Layout = Antd.Layout;
-open Antd.Grid;
 
 module FindPotentialVideosQuery = [%graphql
   {|
@@ -91,7 +90,7 @@ let make = (~term, ~presentation: Types.presentation, _children) => {
                    <Layout.Header>
                      <h3 style=(ReactDOMRe.Style.make(~color="white", ()))>
                        (
-                         presentation##draft##title
+                         Types.presentationTitle(presentation)
                          |> Option.expect("No title for presentation")
                          |> string
                        )

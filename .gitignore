@@ -4,5 +4,6 @@ lib/
 .merlin
 .bsb.lock
 npm-debug.log
+src/index.js
 /lib/bs/
 /node_modules/
