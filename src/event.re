@@ -11,11 +11,11 @@ query findEventPresentations($id: String!) {
         id
         draft {
           title
+          video_url
         }
         speakers {
           name
         }
-        video_url
       }
     }
   }
@@ -129,10 +129,15 @@ let make = (~eventId, ~onPresentationSelected, _children) => {
                                 )>
                                     <div>
                                       (
-                                        switch (presentation##video_url) {
-                                        | None => icon(Antd.IconName.warning)
-                                        | Some(_) =>
-                                          icon(Antd.IconName.checkSquare)
+                                        switch (presentation##draft) {
+                                        | None => null
+                                        | Some(draft) =>
+                                          switch (draft##video_url) {
+                                          | None =>
+                                            icon(Antd.IconName.warning)
+                                          | Some(_) =>
+                                            icon(Antd.IconName.checkSquare)
+                                          }
                                         }
                                       )
                                       (

@@ -106,7 +106,7 @@ let header = (state, send) =>
                   }
                 )
             )
-            _type="text"
+            type_="text"
           />
           <button
             disabled=state.isEventilLoggedIn

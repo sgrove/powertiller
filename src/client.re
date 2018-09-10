@@ -33,20 +33,6 @@ let contextHandler = () => {
 
 let authLink = createContextLink(contextHandler);
 
-/* Create a Link that handles 401 error responses */
-let errorHandler = errorResponse =>
-  switch (errorResponse##networkError) {
-  | Some(error) =>
-    if (error##statusCode == 401) {
-      logout();
-    } else {
-      ();
-    }
-  | None => ()
-  };
-
-let errorLink = createErrorLink(errorHandler);
-
 let _inMemoryCache =
   createInMemoryCache(
     ~dataIdFromObject=

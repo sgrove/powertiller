@@ -1,9 +1,15 @@
 type presentation = {
   .
-  "draft": option({. "title": option(string)}),
+  "draft":
+    option(
+      {
+        .
+        "title": option(string),
+        "video_url": option(string),
+      },
+    ),
   "id": option(string),
   "speakers": Js.Array.t({. "name": option(string)}),
-  "video_url": option(string),
 };
 
 let presentationTitle = presentation =>
