@@ -13,15 +13,6 @@ query VideoWithCaptionsQuery($videoId: String!) {
      player {
        embedHtml
      }
-     captions {
-       items {
-         snippet {
-           language
-           status
-         }
-       body
-       }
-     }
    }
  }
 }
